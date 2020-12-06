@@ -1,10 +1,10 @@
 import TestSuite from 'parsegraph-testsuite';
-import {getTimeInMillis, TIMEOUT} from '../date';
-import {FUZZINESS} from './settings';
-import {fuzzyEquals} from '../math';
+import getTimeInMillis from 'parsegraph-gettimeinmillis';
+import fuzzyEquals from 'parsegraph-fuzzyequals';
 
 const DEFAULT_EXTENT_BOUNDS = 1;
 const NUM_EXTENT_BOUND_COMPONENTS = 2;
+const SEPARATION_TIMEOUT_MS = 10000;
 /* eslint-disable require-jsdoc, max-len  */
 
 export default function Extent(copy) {
@@ -744,7 +744,7 @@ Extent.prototype.separation = function(
     // the separation boundary.
     const startTime = getTimeInMillis();
     while (!givenAtEnd()) {
-      if (getTimeInMillis() - startTime > TIMEOUT) {
+      if (getTimeInMillis() - startTime > SEPARATION_TIMEOUT_MS) {
         throw new Error('Extent separation timed out');
       }
 
@@ -818,8 +818,7 @@ Extent.prototype.equals = function(other, fuzziness) {
     if (
       !fuzzyEquals(
           this.boundLengthAt(i),
-          other.boundLengthAt(i),
-          FUZZINESS,
+          other.boundLengthAt(i)
       )
     ) {
       return false;
@@ -837,8 +836,7 @@ Extent.prototype.equals = function(other, fuzziness) {
     if (
       !fuzzyEquals(
           this.boundSizeAt(i),
-          other.boundSizeAt(i),
-          FUZZINESS,
+          other.boundSizeAt(i)
       )
     ) {
       return false;

@@ -71,6 +71,8 @@
     "express": "^4.17.1",
     "glslify-loader": "^2.0.0",
     "openssl": "^1.1.0",
+    "parsegraph-fuzzyequals": "^1.4.0",
+    "parsegraph-gettimeinmillis": "^1.4.0",
     "parsegraph-testsuite": "^1.4.1",
     "raw-loader": "^4.0.1",
     "ts-mocha": "^8.0.0",
