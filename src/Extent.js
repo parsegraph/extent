@@ -565,7 +565,7 @@ Extent.prototype.scale = function(factor) {
 };
 
 class ExtentSeparator {
-  constructor(thisExtent, givenExtent, givenScale) {
+  constructor(thisExtent, givenExtent, positionAdjustment, allowAxisOverlap, givenScale) {
     this._thisExtent = thisExtent;
     this._givenExtent = givenExtent;
     this._thisBound = 0;
@@ -573,6 +573,8 @@ class ExtentSeparator {
 
     this._thisPosition = 0;
 
+    this._positionAdjustment = positionAdjustment;
+    this._allowAxisOverlap = allowAxisOverlap;
     this._givenScale = givenScale;
 
     // The position of given. This is in this node's space.
@@ -624,6 +626,66 @@ class ExtentSeparator {
   thisAtEnd() {
     return this._thisBound == this._thisExtent.numBounds();
   };
+
+  consume(extentSeparation) {
+    // While the iterators still have bounds in both extents.
+    while (!this.givenAtEnd() && !this.thisAtEnd()) {
+      // Calculate the separation between these bounds.
+      // console.log("Separating");
+      // console.log("This bound size: " + this.boundSizeAt(this._thisBound));
+      // console.log("Given bound size: " + this.givenBoundSize());
+      const thisSize = this._thisExtent.boundSizeAt(this._thisBound);
+      const givenSize = this.givenBoundSize();
+      let boundSeparation;
+      if (!isNaN(thisSize) && !isNaN(givenSize)) {
+        boundSeparation = thisSize + givenSize;
+      } else if (!this._allowAxisOverlap) {
+        if (!isNaN(thisSize)) {
+          boundSeparation = thisSize + axisMinimum;
+        } else if (!isNaN(givenSize)) {
+          boundSeparation = givenSize + axisMinimum;
+        } else {
+          // Both extents are empty at this location.
+          boundSeparation = 0;
+        }
+      } else {
+        // Axis overlap is allowed.
+        boundSeparation = 0;
+      }
+      if (boundSeparation > extentSeparation) {
+        extentSeparation = boundSeparation;
+        // console.log("Found new separation of " + extentSeparation + ".");
+      }
+
+      // Increment the iterators to the next testing point.
+
+      // endComparison is a difference that indicates which bound
+      // ends soonest.
+      const endComparison =
+        this._thisPosition +
+        this._thisExtent.boundLengthAt(this._thisBound) -
+        this._positionAdjustment -
+        (this._givenPosition + this._givenScale * this._givenExtent.boundLengthAt(this._givenBound));
+
+      if (endComparison == 0) {
+        // This bound ends at the same position as given's bound,
+        // so increment both.
+
+        this.incrementGivenBound();
+        this.incrementThisBound();
+      } else if (endComparison > 0) {
+        // This bound ends after given's bound, so increment the
+        // given bound's iterator.
+        this.incrementGivenBound();
+      }
+      if (endComparison < 0) {
+        // Given's bound ends after this bound, so increment this
+        // bound's iterator.
+        this.incrementThisBound();
+      }
+    }
+    return extentSeparation;
+  }
 };
 
 Extent.prototype.separation = function(
@@ -647,7 +709,7 @@ Extent.prototype.separation = function(
   }
   // console.log("Separation(positionAdjustment=" + positionAdjustment + ")");
 
-  const separator = new ExtentSeparator(this, given, givenScale);
+  const separator = new ExtentSeparator(this, given, positionAdjustment, allowAxisOverlap, givenScale);
 
   // extentSeparation is the minimum distance to separate this extent
   // from the given extent, so that they do not overlap if facing one
@@ -690,62 +752,7 @@ Extent.prototype.separation = function(
     }
   }
 
-  // While the iterators still have bounds in both extents.
-  while (!separator.givenAtEnd() && !separator.thisAtEnd()) {
-    // Calculate the separation between these bounds.
-    // console.log("Separating");
-    // console.log("This bound size: " + this.boundSizeAt(separator._thisBound));
-    // console.log("Given bound size: " + givenBoundSize());
-    const thisSize = this.boundSizeAt(separator._thisBound);
-    const givenSize = separator.givenBoundSize();
-    let boundSeparation;
-    if (!isNaN(thisSize) && !isNaN(givenSize)) {
-      boundSeparation = thisSize + givenSize;
-    } else if (!allowAxisOverlap) {
-      if (!isNaN(thisSize)) {
-        boundSeparation = thisSize + axisMinimum;
-      } else if (!isNaN(givenSize)) {
-        boundSeparation = givenSize + axisMinimum;
-      } else {
-        // Both extents are empty at this location.
-        boundSeparation = 0;
-      }
-    } else {
-      // Axis overlap is allowed.
-      boundSeparation = 0;
-    }
-    if (boundSeparation > extentSeparation) {
-      extentSeparation = boundSeparation;
-      // console.log("Found new separation of " + extentSeparation + ".");
-    }
-
-    // Increment the iterators to the next testing point.
-
-    // endComparison is a difference that indicates which bound
-    // ends soonest.
-    const endComparison =
-      separator._thisPosition +
-      this.boundLengthAt(separator._thisBound) -
-      positionAdjustment -
-      (separator._givenPosition + separator._givenScale * given.boundLengthAt(separator._givenBound));
-
-    if (endComparison == 0) {
-      // This bound ends at the same position as given's bound,
-      // so increment both.
-
-      separator.incrementGivenBound();
-      separator.incrementThisBound();
-    } else if (endComparison > 0) {
-      // This bound ends after given's bound, so increment the
-      // given bound's iterator.
-      separator.incrementGivenBound();
-    }
-    if (endComparison < 0) {
-      // Given's bound ends after this bound, so increment this
-      // bound's iterator.
-      separator.incrementThisBound();
-    }
-  }
+  extentSeparation = separator.consume(extentSeparation)
 
   if (!allowAxisOverlap) {
     // Calculate the separation between the remaining bounds of given and
