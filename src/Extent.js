@@ -294,12 +294,14 @@ Extent.prototype.sizeAt = function(offset) {
 
   // Determine the bound at the given offset.
   let pos = 0;
-  for (let i = 0; i < this.numBounds(); ++i) {
+  let i = 0;
+  while (i < this.numBounds()) {
     const thisBoundLength = this.boundLengthAt(i);
     if (offset <= pos + thisBoundLength) {
       break;
     }
     pos += thisBoundLength;
+    ++i;
   }
   // Return NaN if the offset is beyond the full size of this extent.
   if (i == this.numBounds()) {
