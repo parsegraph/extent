@@ -2,7 +2,7 @@
   "name": "parsegraph-extent",
   "version": "1.4.0",
   "description": "2D geometric container",
-  "main": "dist/testsuite.js",
+  "main": "dist/extent.js",
   "scripts": {
     "coverage": "nyc npm run test",
     "test": "mocha -r @babel/register -r jsdom-global/register --recursive",

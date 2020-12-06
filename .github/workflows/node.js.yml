@@ -23,10 +23,10 @@ jobs:
     - run: npm ci
     - run: make
     - run: |
-        mkdir parsegraph-testsuite
-        cp -r -t parsegraph-testsuite package.json package-lock.json README.md demo/ LICENSE dist/
-        tar cvzf parsegraph-testsuite.tar.gz parsegraph-testsuite/
+        mkdir parsegraph-extent
+        cp -r -t parsegraph-extent package.json package-lock.json README.md demo/ LICENSE dist/
+        tar cvzf parsegraph-extent.tar.gz parsegraph-extent/
     - uses: actions/upload-artifact@v2
       with:
-        name: parsegraph-testsuite-${{ github.run_number }}
-        path: parsegraph-testsuite.tar.gz
+        name: parsegraph-extent-${{ github.run_number }}
+        path: parsegraph-extent.tar.gz

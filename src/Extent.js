@@ -1,4 +1,3 @@
-import TestSuite from 'parsegraph-testsuite';
 import getTimeInMillis from 'parsegraph-gettimeinmillis';
 import fuzzyEquals from 'parsegraph-fuzzyequals';
 
@@ -485,12 +484,12 @@ Extent.prototype.combinedExtent = function(
   const result = new Extent();
 
   // Iterate over each bound.
-  let combinedIteration = 0;
+  // let combinedIteration = 0;
   while (givenBound != given.numBounds() && thisBound != this.numBounds()) {
     // console.log("Iterating over each bound.");
     // console.log("This reach: " + thisReach.call(this) + ", size: " + getThisSize.call(this) + ", pos: " + thisPosition);
     // console.log("Given reach: " + givenReach.call(this) + ", size: " + getGivenSize.call(this) + ", pos: " + givenPosition);
-    ++combinedIteration;
+    // ++combinedIteration;
     const thisSize = getThisSize.call(this);
     const givenSize = getGivenSize.call(this);
 
@@ -534,7 +533,7 @@ Extent.prototype.combinedExtent = function(
         getGivenSize.call(this),
     );
     while (getGivenNextBound.call(this)) {
-      ++combinedIteration;
+      // ++combinedIteration;
       result.appendLS(
           scale * given.boundLengthAt(givenBound),
           getGivenSize.call(this),
@@ -548,7 +547,7 @@ Extent.prototype.combinedExtent = function(
         getThisSize.call(this),
     );
     while (getThisNextBound.call(this)) {
-      ++combinedIteration;
+      // ++combinedIteration;
       result.appendLS(this.boundLengthAt(thisBound), getThisSize.call(this));
     }
   }
@@ -563,6 +562,68 @@ Extent.prototype.scale = function(factor) {
       this.setBoundSizeAt(i, size * factor);
     }
   }, this);
+};
+
+class ExtentSeparator {
+  constructor(thisExtent, givenExtent, givenScale) {
+    this._thisExtent = thisExtent;
+    this._givenExtent = givenExtent;
+    this._thisBound = 0;
+    this._givenBound = 0;
+
+    this._thisPosition = 0;
+
+    this._givenScale = givenScale;
+
+    // The position of given. This is in this node's space.
+    this._givenPosition = 0;
+  }
+
+  /*
+   * Moves the iterator for this extent to its next bound.
+   *
+   * The iterator is just a fancy counter. Both the position
+   * and the bound index are tracked.
+   */
+  incrementThisBound() {
+    this._thisPosition += this._thisExtent.boundLengthAt(this._thisBound);
+    ++this._thisBound;
+  };
+
+  givenBoundLength() {
+    return this._givenScale * this._givenExtent.boundLengthAt(this._givenBound);
+  };
+
+  givenBoundSize() {
+    const rv = this._givenExtent.boundSizeAt(this._givenBound);
+    if (isNaN(rv)) {
+      return rv;
+    }
+    return this._givenScale * rv;
+  };
+
+  thisBoundSize() {
+    return this._thisExtent.boundSizeAt(this._thisBound);
+  };
+
+  /*
+   * Moves the iterator for the given extent to the next bound.
+   *
+   * The iterator is just a fancy counter. Both the position
+   * and the bound index are tracked.
+   */
+  incrementGivenBound() {
+    this._givenPosition += this.givenBoundLength();
+    ++this._givenBound;
+  };
+
+  givenAtEnd() {
+    return this._givenBound == this._givenExtent.numBounds();
+  };
+
+  thisAtEnd() {
+    return this._thisBound == this._thisExtent.numBounds();
+  };
 };
 
 Extent.prototype.separation = function(
@@ -586,60 +647,7 @@ Extent.prototype.separation = function(
   }
   // console.log("Separation(positionAdjustment=" + positionAdjustment + ")");
 
-  let thisBound = 0;
-  let givenBound = 0;
-
-  let thisPosition = 0;
-
-  // The position of given. This is in this node's space.
-  let givenPosition = 0;
-
-  /*
-   * Moves the iterator for this extent to its next bound.
-   *
-   * The iterator is just a fancy counter. Both the position
-   * and the bound index are tracked.
-   */
-  const incrementThisBound = function() {
-    thisPosition += this.boundLengthAt(thisBound);
-    ++thisBound;
-  };
-
-  const givenBoundLength = function() {
-    return givenScale * given.boundLengthAt(givenBound);
-  };
-
-  const givenBoundSize = function() {
-    const rv = given.boundSizeAt(givenBound);
-    if (isNaN(rv)) {
-      return rv;
-    }
-    return givenScale * rv;
-  };
-
-  const thisBoundSize = function() {
-    return this.boundSizeAt(thisBound);
-  };
-
-  /*
-   * Moves the iterator for the given extent to the next bound.
-   *
-   * The iterator is just a fancy counter. Both the position
-   * and the bound index are tracked.
-   */
-  const incrementGivenBound = function() {
-    givenPosition += givenBoundLength();
-    ++givenBound;
-  };
-
-  const givenAtEnd = function() {
-    return givenBound == given.numBounds();
-  };
-
-  const thisExtent = this;
-  const thisAtEnd = function() {
-    return thisBound == thisExtent.numBounds();
-  };
+  const separator = new ExtentSeparator(this, given, givenScale);
 
   // extentSeparation is the minimum distance to separate this extent
   // from the given extent, so that they do not overlap if facing one
@@ -649,12 +657,12 @@ Extent.prototype.separation = function(
   // Adjust this extent's iterator to account for the position adjustment.
   if (positionAdjustment < 0) {
     while (
-      !givenAtEnd() &&
-      givenPosition + givenBoundLength() <= -positionAdjustment
+      !separator.givenAtEnd() &&
+      separator._givenPosition + separator.givenBoundLength() <= -positionAdjustment
     ) {
       // If we don't allow axis overlap, then be sure to include these bounds
       // that are being skipped.
-      const boundSeparation = givenBoundSize();
+      const boundSeparation = separator.givenBoundSize();
       if (
         !allowAxisOverlap &&
         !isNaN(boundSeparation) &&
@@ -662,15 +670,15 @@ Extent.prototype.separation = function(
       ) {
         extentSeparation = boundSeparation + axisMinimum;
       }
-      incrementGivenBound.call(this);
+      separator.incrementGivenBound();
     }
   } else {
     // Positive positionAdjustment.
     while (
-      !thisAtEnd() &&
-      thisPosition + this.boundLengthAt(thisBound) <= positionAdjustment
+      !separator.thisAtEnd() &&
+      separator._thisPosition + this.boundLengthAt(separator._thisBound) <= positionAdjustment
     ) {
-      const boundSeparation = thisBoundSize.call(this);
+      const boundSeparation = separator.thisBoundSize();
       if (
         !allowAxisOverlap &&
         !isNaN(boundSeparation) &&
@@ -678,18 +686,18 @@ Extent.prototype.separation = function(
       ) {
         extentSeparation = boundSeparation;
       }
-      incrementThisBound.call(this);
+      separator.incrementThisBound();
     }
   }
 
   // While the iterators still have bounds in both extents.
-  while (!givenAtEnd() && !thisAtEnd()) {
+  while (!separator.givenAtEnd() && !separator.thisAtEnd()) {
     // Calculate the separation between these bounds.
     // console.log("Separating");
-    // console.log("This bound size: " + this.boundSizeAt(thisBound));
+    // console.log("This bound size: " + this.boundSizeAt(separator._thisBound));
     // console.log("Given bound size: " + givenBoundSize());
-    const thisSize = this.boundSizeAt(thisBound);
-    const givenSize = givenBoundSize();
+    const thisSize = this.boundSizeAt(separator._thisBound);
+    const givenSize = separator.givenBoundSize();
     let boundSeparation;
     if (!isNaN(thisSize) && !isNaN(givenSize)) {
       boundSeparation = thisSize + givenSize;
@@ -716,26 +724,26 @@ Extent.prototype.separation = function(
     // endComparison is a difference that indicates which bound
     // ends soonest.
     const endComparison =
-      thisPosition +
-      this.boundLengthAt(thisBound) -
+      separator._thisPosition +
+      this.boundLengthAt(separator._thisBound) -
       positionAdjustment -
-      (givenPosition + givenScale * given.boundLengthAt(givenBound));
+      (separator._givenPosition + separator._givenScale * given.boundLengthAt(separator._givenBound));
 
     if (endComparison == 0) {
       // This bound ends at the same position as given's bound,
       // so increment both.
 
-      incrementGivenBound.call(this);
-      incrementThisBound.call(this);
+      separator.incrementGivenBound();
+      separator.incrementThisBound();
     } else if (endComparison > 0) {
       // This bound ends after given's bound, so increment the
       // given bound's iterator.
-      incrementGivenBound.call(this);
+      separator.incrementGivenBound();
     }
     if (endComparison < 0) {
       // Given's bound ends after this bound, so increment this
       // bound's iterator.
-      incrementThisBound.call(this);
+      separator.incrementThisBound();
     }
   }
 
@@ -743,19 +751,19 @@ Extent.prototype.separation = function(
     // Calculate the separation between the remaining bounds of given and
     // the separation boundary.
     const startTime = getTimeInMillis();
-    while (!givenAtEnd()) {
+    while (!separator.givenAtEnd()) {
       if (getTimeInMillis() - startTime > SEPARATION_TIMEOUT_MS) {
         throw new Error('Extent separation timed out');
       }
 
-      const givenSize = given.boundSizeAt(givenBound);
+      const givenSize = given.boundSizeAt(separator._givenBound);
       if (!isNaN(givenSize)) {
         extentSeparation = Math.max(
             extentSeparation,
             givenScale * givenSize + axisMinimum,
         );
       }
-      ++givenBound;
+      ++separator._givenBound;
     }
   }
 
@@ -909,179 +917,6 @@ Extent.prototype.toDom = function(message) {
 export function createExtent(copy) {
   return new Extent(copy);
 }
-
-const extentTests = new TestSuite('Extent');
-
-extentTests.addTest('Extent.simplify', function() {
-  const extent = new Extent();
-  extent.appendLS(10, 20);
-  extent.appendLS(5, 20);
-  extent.simplify();
-  if (extent.numBounds() !== 1) {
-    return 'Simplify must merge bounds with equal sizes.';
-  }
-});
-
-extentTests.addTest('Extent.numBounds', function() {
-  const extent = new Extent();
-  if (extent.numBounds() !== 0) {
-    return 'Extent must begin with an empty numBounds.';
-  }
-  extent.appendLS(1, 15);
-  if (extent.numBounds() !== 1) {
-    return 'Append must only add one bound.';
-  }
-  extent.appendLS(1, 20);
-  extent.appendLS(1, 25);
-  if (extent.numBounds() !== 3) {
-    return 'Append must only add one bound per call.';
-  }
-});
-
-extentTests.addTest('Extent.separation', function() {
-  const forwardExtent = new Extent();
-  const backwardExtent = new Extent();
-
-  const testSeparation = function(expected) {
-    return (
-      forwardExtent.separation(backwardExtent) ==
-        backwardExtent.separation(forwardExtent) &&
-      forwardExtent.separation(backwardExtent) == expected
-    );
-  };
-
-  forwardExtent.appendLS(50, 10);
-  backwardExtent.appendLS(50, 10);
-  if (!testSeparation(20)) {
-    console.log(testSeparation(20));
-    console.log(forwardExtent.separation(backwardExtent));
-    console.log(backwardExtent.separation(forwardExtent));
-    return (
-      'For single bounds, separation should be equivalent to the size of the ' +
-      'forward and backward extents.'
-    );
-  }
-
-  backwardExtent.appendLS(50, 20);
-  forwardExtent.appendLS(50, 20);
-  if (!testSeparation(40)) {
-    return false;
-  }
-
-  backwardExtent.appendLS(50, 20);
-  forwardExtent.appendLS(50, 40);
-  if (!testSeparation(60)) {
-    return false;
-  }
-
-  backwardExtent.appendLS(50, 10);
-  forwardExtent.appendLS(50, 10);
-  if (!testSeparation(60)) {
-    return false;
-  }
-});
-
-extentTests.addTest(
-    'Extent.Simple combinedExtent',
-    function(resultDom) {
-      const rootNode = new Extent();
-      const forwardNode = new Extent();
-
-      rootNode.appendLS(50, 25);
-      forwardNode.appendLS(12, 6);
-      const separation = rootNode.separation(forwardNode);
-
-      const combined = rootNode.combinedExtent(forwardNode, 0, separation);
-
-      const expected = new Extent();
-      expected.appendLS(12, separation + 6);
-      expected.appendLS(38, 25);
-
-      if (!expected.equals(combined)) {
-        resultDom.appendChild(expected.toDom('Expected forward extent'));
-        resultDom.appendChild(combined.toDom('Actual forward extent'));
-        return 'Combining extents does not work.';
-      }
-    },
-);
-
-extentTests.addTest('Extent.equals', function(
-    resultDom,
-) {
-  const rootNode = new Extent();
-  const forwardNode = new Extent();
-
-  rootNode.appendLS(10, 10);
-  rootNode.appendLS(10, NaN);
-  rootNode.appendLS(10, 15);
-
-  forwardNode.appendLS(10, 10);
-  forwardNode.appendLS(10, NaN);
-  forwardNode.appendLS(10, 15);
-
-  if (!rootNode.equals(forwardNode)) {
-    return 'Equals does not handle NaN well.';
-  }
-});
-
-extentTests.addTest(
-    'Extent.combinedExtent with NaN',
-    function(resultDom) {
-      const rootNode = new Extent();
-      const forwardNode = new Extent();
-
-      rootNode.appendLS(50, 25);
-
-      forwardNode.appendLS(10, NaN);
-      forwardNode.setBoundSizeAt(0, NaN);
-      if (!isNaN(forwardNode.boundSizeAt(0))) {
-        return forwardNode.boundSizeAt(0);
-      }
-      forwardNode.appendLS(30, 5);
-
-      const separation = rootNode.separation(forwardNode);
-      if (separation != 30) {
-        return 'Separation doesn\'t even match. Actual=' + separation;
-      }
-
-      const combined = rootNode.combinedExtent(forwardNode, 0, separation);
-
-      const expected = new Extent();
-      expected.appendLS(10, 25);
-      expected.appendLS(30, 35);
-      expected.appendLS(10, 25);
-
-      if (!expected.equals(combined)) {
-        resultDom.appendChild(expected.toDom('Expected forward extent'));
-        resultDom.appendChild(combined.toDom('Actual forward extent'));
-        return 'Combining extents does not work.';
-      }
-    },
-);
-
-extentTests.addTest('Extent.combinedExtent', function(
-    resultDom,
-) {
-  const rootNode = new Extent();
-  const forwardNode = new Extent();
-
-  rootNode.appendLS(50, 25);
-  forwardNode.appendLS(12, 6);
-  const separation = rootNode.separation(forwardNode);
-
-  const combined = rootNode.combinedExtent(forwardNode, 25 - 6, separation);
-
-  const expected = new Extent();
-  expected.appendLS(19, 25);
-  expected.appendLS(12, separation + 6);
-  expected.appendLS(19, 25);
-
-  if (!expected.equals(combined)) {
-    resultDom.appendChild(expected.toDom('Expected forward extent'));
-    resultDom.appendChild(combined.toDom('Actual forward extent'));
-    return 'Combining extents does not work.';
-  }
-});
 
 export function checkExtentsEqual(
     caret,
