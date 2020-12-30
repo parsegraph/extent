@@ -1,6 +1,6 @@
 {
   "name": "parsegraph-extent",
-  "version": "1.4.1",
+  "version": "1.4.2",
   "description": "2D geometric container",
   "main": "dist/extent.js",
   "scripts": {
