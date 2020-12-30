@@ -3,6 +3,7 @@
   "version": "1.4.2",
   "description": "2D geometric container",
   "main": "dist/extent.js",
+  "types": "dist/extent.d.ts",
   "scripts": {
     "coverage": "nyc npm run test",
     "test": "mocha -r @babel/register -r jsdom-global/register --recursive",
@@ -71,10 +72,11 @@
     "express": "^4.17.1",
     "glslify-loader": "^2.0.0",
     "openssl": "^1.1.0",
-    "parsegraph-fuzzyequals": "^1.4.0",
-    "parsegraph-gettimeinmillis": "^1.4.0",
+    "parsegraph-fuzzyequals": "^1.4.1",
+    "parsegraph-gettimeinmillis": "^1.4.1",
     "parsegraph-testsuite": "^1.4.1",
     "raw-loader": "^4.0.1",
+    "ts-loader": "^8.0.12",
     "ts-mocha": "^8.0.0",
     "webgl-mock": "^0.1.7"
   }

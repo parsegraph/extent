@@ -1,7 +1,7 @@
 const path = require("path");
 
 module.exports = {
-  entry: path.resolve(__dirname, "src/index.ts"),
+  entry: path.resolve(__dirname, "src/extent.ts"),
   output: {
     path: path.resolve(__dirname, "dist"),
     filename: "extent.js",
@@ -12,13 +12,9 @@ module.exports = {
   module: {
     rules: [
       {
-        test: /\.(js)$/,
+        test: /\.(js|ts|tsx?)$/,
         exclude: /node_modules/,
-        use: ["babel-loader"],
-      },
-      {
-        test: /\.tsx?$/,
-        loader: "babel-loader",
+        loader: 'babel-loader!ts-loader'
       },
       {
         test: /\.(glsl|vs|fs|vert|frag)$/,

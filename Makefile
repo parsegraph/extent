@@ -1,15 +1,18 @@
 DIST_NAME = extent
 
 SCRIPT_FILES = \
-	src/index.ts \
-	src/Extent.js
+	src/$(DIST_NAME).ts
+
+DECLARATION_FILES = \
+	dist/$(DIST_NAME).d.ts \
+	dist/$(DIST_NAME).d.ts.map
 
 all: build lint test coverage esdoc
 
-build: dist/$(DIST_NAME).js
+build: dist/$(DIST_NAME).js $(DECLARATION_FILES)
 .PHONY: build
 
-demo: dist/$(DIST_NAME).js
+demo: dist/$(DIST_NAME).js $(DECLARATION_FILES)
 	npm run demo
 .PHONY: demo
 
@@ -39,8 +42,9 @@ esdoc:
 doc: esdoc
 .PHONY: doc
 
-dist/$(DIST_NAME).js: $(SCRIPT_FILES)
+dist/$(DIST_NAME).js: package.json package-lock.json $(SCRIPT_FILES)
 	npm run build
+	mv -v dist/src/* dist/
 
 clean:
 	rm -rf dist .nyc_output
