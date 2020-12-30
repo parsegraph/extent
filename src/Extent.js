@@ -629,7 +629,7 @@ class ExtentSeparator {
     return this._thisBound == this._thisExtent.numBounds();
   };
 
-  consume(extentSeparation) {
+  consume(extentSeparation, axisMinimum) {
     // While the iterators still have bounds in both extents.
     while (!this.givenAtEnd() && !this.thisAtEnd()) {
       // Calculate the separation between these bounds.
@@ -754,7 +754,7 @@ Extent.prototype.separation = function(
     }
   }
 
-  extentSeparation = separator.consume(extentSeparation)
+  extentSeparation = separator.consume(extentSeparation, axisMinimum)
 
   if (!allowAxisOverlap) {
     // Calculate the separation between the remaining bounds of given and
