@@ -1,6 +1,7 @@
 import getTimeInMillis from 'parsegraph-gettimeinmillis';
 import fuzzyEquals from 'parsegraph-fuzzyequals';
 import ExtentSeparator from './ExtentSeparator';
+import ExtentCombiner from './ExtentCombiner';
 
 const DEFAULT_EXTENT_BOUNDS = 1;
 const NUM_EXTENT_BOUND_COMPONENTS = 2;
@@ -427,144 +428,7 @@ export default class Extent {
       return this.combinedExtent(givenCopy, 0, sizeAdjustment, scale);
     }
 
-    let thisBound = 0;
-    let thisPosition = 0;
-    let givenBound = 0;
-    let givenPosition = 0;
-
-    // Returns this bound's size
-    const getThisSize = function() {
-      if (thisBound >= this.numBounds()) {
-        throw new Error(
-            'Getting this bound\'s size past the ' + 'end of this extent.',
-        );
-      }
-      return this.boundSizeAt(thisBound);
-    };
-
-    // Returns given's bound's size
-    const getGivenSize = function() {
-      if (givenBound >= given.numBounds()) {
-        throw new Error(
-            'Getting given\'s size past the end of ' + 'given\'s extent.',
-        );
-      }
-      const rv = given.boundSizeAt(givenBound);
-      if (isNaN(rv)) {
-        return NaN;
-      }
-      return scale * rv + sizeAdjustment;
-    };
-
-    // Moves to this extent's next bound. true is returned as long as
-    // thisBound is valid.
-    const getThisNextBound = function() {
-      if (thisBound >= this.numBounds()) {
-        throw new Error('Getting past end of this extent.');
-      }
-      thisPosition += this.boundLengthAt(thisBound);
-      ++thisBound;
-      return thisBound != this.numBounds();
-    };
-
-    // Increments given's iterator. true is returned as long as givenBound
-    // is valid.
-    const getGivenNextBound = function() {
-      if (givenBound >= given.numBounds()) {
-        throw new Error('Getting past end of given bound.');
-      }
-      givenPosition += scale * given.boundLengthAt(givenBound);
-      ++givenBound;
-      return givenBound != given.numBounds();
-    };
-
-    const givenReach = function() {
-      if (givenBound >= given.numBounds()) {
-        return givenPosition;
-      }
-      return givenPosition + scale * given.boundLengthAt(givenBound);
-    };
-
-    const thisReach = function() {
-      if (thisBound == this.numBounds()) {
-        return thisPosition;
-      }
-      return thisPosition + this.boundLengthAt(thisBound);
-    };
-
-    // Create the aggregate result.
-    const result = new Extent();
-
-    // Iterate over each bound.
-    // let combinedIteration = 0;
-    while (givenBound != given.numBounds() && thisBound != this.numBounds()) {
-      // console.log("Iterating over each bound.");
-      // console.log("This reach: " + thisReach.call(this) + ", size: " + getThisSize.call(this) + ", pos: " + thisPosition);
-      // console.log("Given reach: " + givenReach.call(this) + ", size: " + getGivenSize.call(this) + ", pos: " + givenPosition);
-      // ++combinedIteration;
-      const thisSize = getThisSize.call(this);
-      const givenSize = getGivenSize.call(this);
-
-      let newSize;
-      if (!isNaN(thisSize) && !isNaN(givenSize)) {
-        newSize = Math.max(thisSize, givenSize);
-      } else if (!isNaN(thisSize)) {
-        newSize = thisSize;
-      } else {
-        newSize = givenSize;
-      }
-
-      result.appendLS(
-          Math.min(thisReach.call(this), givenReach.call(this)) -
-          Math.max(thisPosition, givenPosition),
-          newSize,
-      );
-
-      if (thisReach.call(this) == givenReach.call(this)) {
-        // This bound ends at the same position as given's
-        // bound, so increment both iterators.
-        getThisNextBound.call(this);
-        getGivenNextBound.call(this);
-      } else if (thisReach.call(this) < givenReach()) {
-        // This bound ends before given's bound, so increment
-        // this bound's iterator.
-        getThisNextBound.call(this);
-      } else {
-        // Assert: thisReach() > givenReach()
-        // Given's bound ends before this bound, so increment
-        // given's iterator.
-        getGivenNextBound.call(this);
-      }
-    }
-
-    if (givenBound != given.numBounds()) {
-      // Finish off given last overlapping bound to get completely
-      // in sync with givens.
-      result.appendLS(
-          givenReach.call(this) - thisReach.call(this),
-          getGivenSize.call(this),
-      );
-      while (getGivenNextBound.call(this)) {
-        // ++combinedIteration;
-        result.appendLS(
-            scale * given.boundLengthAt(givenBound),
-            getGivenSize.call(this),
-        );
-      }
-    } else if (thisBound != this.numBounds()) {
-      // Finish off this extent's last overlapping bound to get completely
-      // in sync with given's iterator.
-      result.appendLS(
-          thisReach.call(this) - givenReach.call(this),
-          getThisSize.call(this),
-      );
-      while (getThisNextBound.call(this)) {
-        // ++combinedIteration;
-        result.appendLS(this.boundLengthAt(thisBound), getThisSize.call(this));
-      }
-    }
-    // console.log("Combined after " + combinedIteration + "iterations");
-    return result;
+    return new ExtentCombiner(this, given, lengthAdjustment, sizeAdjustment, scale).combine();
   };
 
   scale(factor:number):void {
