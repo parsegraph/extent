@@ -1,6 +1,6 @@
 {
     "name": "parsegraph-extent",
-    "version": "1.4.5",
+    "version": "1.4.6",
     "description": "extent",
     "main": "dist/parsegraph-extent.js",
     "types": "dist/parsegraph-extent.d.ts",
@@ -13,5 +13,9 @@
     "bugs": {
       "url": "https://github.com/parsegraph/extent/issues"
     },
-    "homepage": "https://github.com/parsegraph/extent#readme"
+    "homepage": "https://github.com/parsegraph/extent#readme",
+    "dependencies": {
+      "parsegraph-fuzzyequals": "^1.4.6",
+      "parsegraph-gettimeinmillis": "^1.4.3"
+    }
   }
