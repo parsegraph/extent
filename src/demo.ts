@@ -1,11 +1,11 @@
-import todo from ".";
+import Extent from ".";
 
 document.addEventListener("DOMContentLoaded", () => {
   const root = document.getElementById("demo");
   root.style.position = "relative";
 
   const container = document.createElement("div");
-  container.innerHTML = `${todo()}`;
+  container.innerHTML = `${new Extent()}`;
   container.style.position = "absolute";
   container.style.left = "0px";
   container.style.top = "0px";
@@ -13,7 +13,7 @@ document.addEventListener("DOMContentLoaded", () => {
   root.appendChild(container);
   container.style.fontSize = "18px";
   container.style.fontFamily = "sans";
-  const refresh = ()=>{
+  const refresh = () => {
     const rand = () => Math.floor(Math.random() * 255);
     document.body.style.backgroundColor = `rgb(${rand()}, ${rand()}, ${rand()})`;
     container.style.color = `rgb(${rand()}, ${rand()}, ${rand()})`;
@@ -34,17 +34,17 @@ document.addEventListener("DOMContentLoaded", () => {
 
   container.style.transition = "color 2s, left 2s, top 2s";
   document.body.style.transition = "background-color 2s";
-  let timer:any = null;
-  let dotTimer:any = null;
+  let timer: any = null;
+  let dotTimer: any = null;
   let dotIndex = 0;
-  let dotState = ["#f00", "#c00"]
-  const refreshDot = ()=>{
+  const dotState = ["#f00", "#c00"];
+  const refreshDot = () => {
     dotIndex = (dotIndex + 1) % dotState.length;
     dot.style.backgroundColor = dotState[dotIndex];
   };
   const interval = 3000;
   const dotInterval = 500;
-  root.addEventListener("click", ()=>{
+  root.addEventListener("click", () => {
     if (timer) {
       clearInterval(timer);
       timer = null;

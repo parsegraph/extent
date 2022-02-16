@@ -1,17 +1,23 @@
-import Extent from './extent';
+import Extent from "./Extent";
 
 export default class ExtentSeparator {
-  _thisExtent:Extent;
-  _givenExtent:Extent;
-  _thisBound:number;
-  _givenBound:number;
-  _thisPosition:number;
-  _positionAdjustment:number;
-  _allowAxisOverlap:boolean;
-  _givenScale:number;
-  _givenPosition:number;
+  _thisExtent: Extent;
+  _givenExtent: Extent;
+  _thisBound: number;
+  _givenBound: number;
+  _thisPosition: number;
+  _positionAdjustment: number;
+  _allowAxisOverlap: boolean;
+  _givenScale: number;
+  _givenPosition: number;
 
-  constructor(thisExtent:Extent, givenExtent:Extent, positionAdjustment:number, allowAxisOverlap:boolean, givenScale:number) {
+  constructor(
+    thisExtent: Extent,
+    givenExtent: Extent,
+    positionAdjustment: number,
+    allowAxisOverlap: boolean,
+    givenScale: number
+  ) {
     this._thisExtent = thisExtent;
     this._givenExtent = givenExtent;
     this._thisBound = 0;
@@ -33,26 +39,26 @@ export default class ExtentSeparator {
    * The iterator is just a fancy counter. Both the position
    * and the bound index are tracked.
    */
-  incrementThisBound():void {
+  incrementThisBound(): void {
     this._thisPosition += this._thisExtent.boundLengthAt(this._thisBound);
     ++this._thisBound;
-  };
+  }
 
-  givenBoundLength():number {
+  givenBoundLength(): number {
     return this._givenScale * this._givenExtent.boundLengthAt(this._givenBound);
-  };
+  }
 
-  givenBoundSize():number {
+  givenBoundSize(): number {
     const rv = this._givenExtent.boundSizeAt(this._givenBound);
     if (isNaN(rv)) {
       return rv;
     }
     return this._givenScale * rv;
-  };
+  }
 
-  thisBoundSize():number {
+  thisBoundSize(): number {
     return this._thisExtent.boundSizeAt(this._thisBound);
-  };
+  }
 
   /*
    * Moves the iterator for the given extent to the next bound.
@@ -60,20 +66,20 @@ export default class ExtentSeparator {
    * The iterator is just a fancy counter. Both the position
    * and the bound index are tracked.
    */
-  incrementGivenBound():void {
+  incrementGivenBound(): void {
     this._givenPosition += this.givenBoundLength();
     ++this._givenBound;
-  };
+  }
 
-  givenAtEnd():boolean {
+  givenAtEnd(): boolean {
     return this._givenBound == this._givenExtent.numBounds();
-  };
+  }
 
-  thisAtEnd():boolean {
+  thisAtEnd(): boolean {
     return this._thisBound == this._thisExtent.numBounds();
-  };
+  }
 
-  consume(extentSeparation:number, axisMinimum:number):number {
+  consume(extentSeparation: number, axisMinimum: number): number {
     // While the iterators still have bounds in both extents.
     while (!this.givenAtEnd() && !this.thisAtEnd()) {
       // Calculate the separation between these bounds.
@@ -111,7 +117,8 @@ export default class ExtentSeparator {
         this._thisPosition +
         this._thisExtent.boundLengthAt(this._thisBound) -
         this._positionAdjustment -
-        (this._givenPosition + this._givenScale * this._givenExtent.boundLengthAt(this._givenBound));
+        (this._givenPosition +
+          this._givenScale * this._givenExtent.boundLengthAt(this._givenBound));
 
       if (endComparison == 0) {
         // This bound ends at the same position as given's bound,
@@ -132,4 +139,4 @@ export default class ExtentSeparator {
     }
     return extentSeparation;
   }
-};
+}

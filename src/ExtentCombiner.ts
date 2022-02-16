@@ -1,17 +1,23 @@
-import Extent from './extent';
+import Extent from "./Extent";
 
 export default class ExtentSeparator {
-  _thisExtent:Extent;
-  _givenExtent:Extent;
-  _lengthAdjustment:number;
-  _sizeAdjustment:number;
-  _scale:number;
-  thisBound:number;
-  thisPosition:number;
-  givenBound:number;
-  givenPosition:number;
+  _thisExtent: Extent;
+  _givenExtent: Extent;
+  _lengthAdjustment: number;
+  _sizeAdjustment: number;
+  _scale: number;
+  thisBound: number;
+  thisPosition: number;
+  givenBound: number;
+  givenPosition: number;
 
-  constructor(thisExtent:Extent, givenExtent:Extent, lengthAdjustment:number, sizeAdjustment:number, scale:number) {
+  constructor(
+    thisExtent: Extent,
+    givenExtent: Extent,
+    lengthAdjustment: number,
+    sizeAdjustment: number,
+    scale: number
+  ) {
     this._thisExtent = thisExtent;
     this._givenExtent = givenExtent;
     this._lengthAdjustment = lengthAdjustment;
@@ -25,20 +31,20 @@ export default class ExtentSeparator {
   }
 
   // Returns this bound's size
-  getThisSize():number {
+  getThisSize(): number {
     if (this.thisBound >= this._thisExtent.numBounds()) {
       throw new Error(
-          'Getting this bound\'s size past the ' + 'end of this extent.',
+        "Getting this bound's size past the " + "end of this extent."
       );
     }
     return this._thisExtent.boundSizeAt(this.thisBound);
-  };
+  }
 
   // Returns given's bound's size
-  getGivenSize():number {
+  getGivenSize(): number {
     if (this.givenBound >= this._givenExtent.numBounds()) {
       throw new Error(
-          'Getting given\'s size past the end of ' + 'given\'s extent.',
+        "Getting given's size past the end of " + "given's extent."
       );
     }
     const rv = this._givenExtent.boundSizeAt(this.givenBound);
@@ -46,52 +52,58 @@ export default class ExtentSeparator {
       return NaN;
     }
     return this._scale * rv + this._sizeAdjustment;
-  };
+  }
 
   // Moves to this extent's next bound. true is returned as long as
   // thisBound is valid.
-  getThisNextBound():boolean {
+  getThisNextBound(): boolean {
     if (this.thisBound >= this._thisExtent.numBounds()) {
-      throw new Error('Getting past end of this extent.');
+      throw new Error("Getting past end of this extent.");
     }
     this.thisPosition += this._thisExtent.boundLengthAt(this.thisBound);
     ++this.thisBound;
     return this.thisBound != this._thisExtent.numBounds();
-  };
+  }
 
   // Increments given's iterator. true is returned as long as givenBound
   // is valid.
-  getGivenNextBound():boolean {
+  getGivenNextBound(): boolean {
     if (this.givenBound >= this._givenExtent.numBounds()) {
-      throw new Error('Getting past end of given bound.');
+      throw new Error("Getting past end of given bound.");
     }
-    this.givenPosition += this._scale * this._givenExtent.boundLengthAt(this.givenBound);
+    this.givenPosition +=
+      this._scale * this._givenExtent.boundLengthAt(this.givenBound);
     ++this.givenBound;
     return this.givenBound != this._givenExtent.numBounds();
-  };
+  }
 
-  givenReach():number {
+  givenReach(): number {
     if (this.givenBound >= this._givenExtent.numBounds()) {
       return this.givenPosition;
     }
-    return this.givenPosition + this._scale * this._givenExtent.boundLengthAt(this.givenBound);
-  };
+    return (
+      this.givenPosition +
+      this._scale * this._givenExtent.boundLengthAt(this.givenBound)
+    );
+  }
 
   thisReach() {
     if (this.thisBound == this._thisExtent.numBounds()) {
       return this.thisPosition;
     }
     return this.thisPosition + this._thisExtent.boundLengthAt(this.thisBound);
-  };
+  }
 
-  combine():Extent {
-
+  combine(): Extent {
     // Create the aggregate result.
     const result = new Extent();
 
     // Iterate over each bound.
     // let combinedIteration = 0;
-    while (this.givenBound != this._givenExtent.numBounds() && this.thisBound != this._thisExtent.numBounds()) {
+    while (
+      this.givenBound != this._givenExtent.numBounds() &&
+      this.thisBound != this._thisExtent.numBounds()
+    ) {
       // console.log("Iterating over each bound.");
       // console.log("This reach: " + thisReach.call(this) + ", size: " + getThisSize.call(this) + ", pos: " + thisPosition);
       // console.log("Given reach: " + givenReach.call(this) + ", size: " + getGivenSize.call(this) + ", pos: " + givenPosition);
@@ -109,9 +121,9 @@ export default class ExtentSeparator {
       }
 
       result.appendLS(
-          Math.min(this.thisReach(), this.givenReach()) -
+        Math.min(this.thisReach(), this.givenReach()) -
           Math.max(this.thisPosition, this.givenPosition),
-          newSize,
+        newSize
       );
 
       if (this.thisReach() == this.givenReach()) {
@@ -135,26 +147,26 @@ export default class ExtentSeparator {
       // Finish off given last overlapping bound to get completely
       // in sync with givens.
       result.appendLS(
-          this.givenReach() - this.thisReach(),
-          this.getGivenSize(),
+        this.givenReach() - this.thisReach(),
+        this.getGivenSize()
       );
       while (this.getGivenNextBound()) {
         // ++combinedIteration;
         result.appendLS(
-            this._scale * this._givenExtent.boundLengthAt(this.givenBound),
-            this.getGivenSize(),
+          this._scale * this._givenExtent.boundLengthAt(this.givenBound),
+          this.getGivenSize()
         );
       }
     } else if (this.thisBound != this._thisExtent.numBounds()) {
       // Finish off this extent's last overlapping bound to get completely
       // in sync with given's iterator.
-      result.appendLS(
-          this.thisReach() - this.givenReach(),
-          this.getThisSize(),
-      );
+      result.appendLS(this.thisReach() - this.givenReach(), this.getThisSize());
       while (this.getThisNextBound()) {
         // ++combinedIteration;
-        result.appendLS(this._thisExtent.boundLengthAt(this.thisBound), this.getThisSize());
+        result.appendLS(
+          this._thisExtent.boundLengthAt(this.thisBound),
+          this.getThisSize()
+        );
       }
     }
     // console.log("Combined after " + combinedIteration + "iterations");
