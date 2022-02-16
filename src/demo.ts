@@ -2,10 +2,14 @@ import Extent from ".";
 
 document.addEventListener("DOMContentLoaded", () => {
   const root = document.getElementById("demo");
+
+  const extent = new Extent();
+  extent.appendLS(50, 10);
+
   root.style.position = "relative";
 
   const container = document.createElement("div");
-  container.innerHTML = `${new Extent()}`;
+  container.appendChild(extent.toDom("Extent"));
   container.style.position = "absolute";
   container.style.left = "0px";
   container.style.top = "0px";
