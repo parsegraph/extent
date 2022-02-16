@@ -1,17 +1,9 @@
 {
   "name": "parsegraph-extent",
-  "version": "1.4.6-dev",
+  "version": "1.4.6",
   "description": "2D geometric container",
-  "main": "dist/parsegraph-extent.js",
-  "types": "dist/parsegraph-extent.d.ts",
-  "scripts": {
-    "coverage": "nyc npm run test",
-    "test": "mocha -r @babel/register -r jsdom-global/register --recursive",
-    "demo": "node demo/demo.js",
-    "autobuild": "webpack --watch --config webpack.config.js",
-    "build": "webpack --config webpack.config.js",
-    "build-prod": "NODE_ENV=production webpack --config webpack.prod.js"
-  },
+  "main": "dist/src/index.js",
+  "types": "dist/src/index.d.ts",
   "repository": {
     "type": "git",
     "url": "git+ssh://git@github.com/parsegraph/extent.git"
@@ -22,17 +14,6 @@
     "url": "https://github.com/parsegraph/extent/issues"
   },
   "homepage": "https://github.com/parsegraph/extent#readme",
-  "nyc": {
-    "extends": "@istanbuljs/nyc-config-babel",
-    "reporter": [
-      "html"
-    ],
-    "exclude": [
-      "test/**.js",
-      "dist/**.js"
-    ],
-    "reportDir": "dist/coverage"
-  },
   "dependencies": {
     "parsegraph-fuzzyequals": "^1.4.6",
     "parsegraph-gettimeinmillis": "^1.4.3"
