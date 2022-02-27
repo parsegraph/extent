@@ -1,14 +1,61 @@
 const path = require("path");
-const { execSync } = require("child_process");
+const { execSync} = require("child_process");
+const { readFileSync } = require("fs");
 
 const DIST_NAME = "extent";
 
 const relDir = (...pathFrags)=>path.resolve(__dirname, ...pathFrags);
 
-const hasShaderFiles = ()=>{
-  const rv = execSync(`find ${relDir("src")} -type f -name '*.glsl'`);
-  return rv.stdout && rv.stdout.trim().length > 0;
+const hasFiles = (extension)=>{
+  const rv = execSync(`find ${relDir("src")} -type f -name '*.${extension}'`);
+  return rv.toString() && rv.toString().length > 0;
 }
+
+const hasShaderFiles = ()=>{
+  return hasFiles("glsl");
+}
+
+const hasCSVFiles = ()=>{
+  return hasFiles("csv") || hasFiles("tsv") || hasFiles("txt");
+}
+
+const recognizedExternals = {
+  "react":{
+    commonjs:"react",
+    commonjs2:"react",
+    amd:"react",
+    root:"React"
+  },
+  "parsegraph-log":{
+    commonjs:"parsegraph-log",
+    commonjs2:"parsegraph-log",
+    amd:"parsegraph-log",
+    root:"parsegraph_log"
+  },
+  "parsegraph-checkglerror":{
+    commonjs:"parsegraph-checkglerror",
+    commonjs2:"parsegraph-checkglerror",
+    amd:"parsegraph-checkglerror",
+    root:"parsegraph_checkglerror"
+  }
+};
+
+const getPackageJSON = ()=>{
+    return JSON.parse(readFileSync(relDir("package.json")));
+};
+
+const buildExternals = ()=>{
+  const rv = {};
+  const packageJson = getPackageJSON();
+  if (packageJson.peerDependencies) {
+    Object.keys(recognizedExternals).forEach(name=>{
+      if(name in packageJson.peerDependencies) {
+        rv[name] = recognizedExternals[name];
+      }
+    });
+  }
+  return rv;
+};
 
 const webpackConfig = (prod)=>{
   const rules = [
@@ -36,8 +83,18 @@ const webpackConfig = (prod)=>{
     });
     extensions.push(".glsl");
   }
+  if (hasCSVFiles()) {
+    rules.push({
+      test: /\.(csv|tsv|txt)$/i,
+      use: "raw-loader"
+    });
+    extensions.push(".tsv");
+    extensions.push(".txt");
+    extensions.push(".csv");
+  }
 
   return {
+    externals: buildExternals(),
     output: {
       path: relDir(prod ? "dist-prod" : "dist", "src"),
       globalObject: "this",

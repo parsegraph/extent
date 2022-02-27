@@ -1,10 +1,18 @@
 const glob = require("glob");
 const express = require("express");
 const app = express();
+const { readFileSync, statSync } = require("fs");
 
 const { DIST_NAME } = require("../webpack.common");
 
 const getPort = (port) => {
+  if (statSync("../demo.port")) {
+    try {
+      port = parseInt(readFileSync("../demo.port"));
+    } catch (ex) {
+      console.log(ex);
+    }
+  }
   if (process.env.SITE_PORT) {
     try {
       port = parseInt(process.env.SITE_PORT);

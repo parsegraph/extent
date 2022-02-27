@@ -22,6 +22,14 @@ CONFIG_FILES = \
 
 all: build lint test coverage doc
 
+show-runs:
+	xdg-open https://github.com/parsegraph/$(DIST_NAME)/actions
+.PHONY: show-runs
+
+show-npm:
+	xdg-open https://npmjs.com/parsegraph-$(DIST_NAME)
+.PHONY: show-npm
+
 build: $(DEST_LIB)
 .PHONY: build
 
@@ -30,29 +38,39 @@ autobuild:
 .PHONY: autobuild
 
 install-deps:
-	yarn install --immutable --immutable-cache --check-cache
+	./install-deps.sh
 .PHONY: install-deps
 
 build-prod: $(PROD_LIB)
 .PHONY: build-prod
 
 demo: $(DEST_LIB)
-	cd demo && yarn install && yarn start
+	SITE_PORT=$(DEMO_PORT) cd demo && yarn install && yarn start
 .PHONY: demo
 
+tmux:
+	tmuxify restart $(DEMO_PORT)
+.PHONY: tmux
+
+stop-tmux:
+	tmuxify stop
+.PHONY: stop-tmux
+
+RUN_TEST=npx jest --env=jsdom
+
 check:
-	npx jest
+	$(RUN_TEST)
 .PHONY: check
 
 test: check
 .PHONY: test
 
 autotest:
-	npx jest --watch
+	$(RUN_TEST) --watch
 .PHONY: autotest
 
 coverage:
-	npx jest --coverage --coverageDirectory=dist/coverage --coveragePathIgnorePatterns=demo
+	$(RUN_TEST) --coverage --coverageDirectory=dist/coverage --coveragePathIgnorePatterns=demo
 .PHONY: coverage
 
 prettier:
@@ -86,7 +104,7 @@ tar-prod: parsegraph-$(DIST_NAME)-prod.tgz
 .PHONY: tar
 
 wait:
-	inotifywait -e modify -r $(CONFIG_FILES) $(SCRIPT_FILES)
+	./wait.sh $(CONFIG_FILES) $(SCRIPT_FILES) $(EXTRA_SCRIPTS)
 .PHONY: wait
 
 clean:
@@ -98,10 +116,10 @@ EXTRA_FILES = \
 	README.md \
 	package.json
 
-$(DEST_LIB): $(EXTRA_FILES) $(SCRIPT_FILES)
+$(DEST_LIB): $(EXTRA_FILES) $(SCRIPT_FILES) $(EXTRA_SCRIPTS)
 	npx webpack --config webpack.config.js
 
-$(PROD_LIB): $(EXTRA_FILES) $(SCRIPT_FILES)
+$(PROD_LIB): $(EXTRA_FILES) $(SCRIPT_FILES) $(EXTRA_SCRIPTS)
 	NODE_ENV=production npx webpack --config webpack.prod.js
 
 BUILD=parsegraph-$(DIST_NAME)
