@@ -3891,15 +3891,15 @@ parse5@6.0.1:
   resolved "https://registry.yarnpkg.com/parse5/-/parse5-6.0.1.tgz#e1a1c085c569b3dc08321184f19a39cc27f7c30b"
   integrity sha512-Ofn/CTFzRGTTxwpNEs9PP93gXShHcTq255nzRYSKe8AkVpZY7e1fpmTfOyoIvjP5HG7Z2ZM7VS9PPhQGW2pOpw==
 
-parsegraph-fuzzyequals@^1.4.6:
-  version "1.4.6"
-  resolved "https://registry.yarnpkg.com/parsegraph-fuzzyequals/-/parsegraph-fuzzyequals-1.4.6.tgz#43aaf86cacfba2b448f9429b93f2db6b0e55464f"
-  integrity sha512-PlU8LVo57/Qlk1qC8VhZ66/lJTx6uBJHyoyFjP03PBDQCvcl/YkQNgaYDnuSweV6hPCe/I+IiXD7tP2i3z9D1Q==
+parsegraph-fuzzyequals@^1.4.8:
+  version "1.4.8"
+  resolved "https://registry.yarnpkg.com/parsegraph-fuzzyequals/-/parsegraph-fuzzyequals-1.4.8.tgz#1850e87aa42441cbecdffa1a497f7e29b5f6fe13"
+  integrity sha512-eVBlPEZ+tOCb5j21QZKFrjCmQ0q98P9Z0g3uGDw01YA7U63QyFfM8EyiwyR04XhRLzW7it9vtZ0E7V2lIeaUVw==
 
-parsegraph-gettimeinmillis@^1.4.3:
-  version "1.4.3"
-  resolved "https://registry.yarnpkg.com/parsegraph-gettimeinmillis/-/parsegraph-gettimeinmillis-1.4.3.tgz#888152b73c425f1ffca860b16a68af7691399d12"
-  integrity sha512-qon9TkxxwEVy1U4rRBya91aqoOPKctvBUIGF6t5sB0itQZENKjbHaJzv1Vl7+qHUCGp10KiQmJ9MAvfkMMXfUA==
+parsegraph-gettimeinmillis@^1.4.5:
+  version "1.4.5"
+  resolved "https://registry.yarnpkg.com/parsegraph-gettimeinmillis/-/parsegraph-gettimeinmillis-1.4.5.tgz#b2bb3c8351b4fa827a3e4a4f404336b2f3366493"
+  integrity sha512-J53sQzXiHZB/lenyB8Ep45aF2MoX46TPpY9lvkurl3PtxTNKoOH68Pjcn+zYEUpQh61gY/T21WvKaSmHD3YoGw==
 
 path-exists@^3.0.0:
   version "3.0.0"
