@@ -1,4 +1,4 @@
-import {assert} from "chai";
+import { assert } from "chai";
 import Extent from "../src/index";
 
 describe("Extent", function () {
@@ -7,17 +7,29 @@ describe("Extent", function () {
     extent.appendLS(10, 20);
     extent.appendLS(5, 20);
     extent.simplify();
-    assert.equal(extent.numBounds(), 1, "Simplify must merge bounds with equal sizes.");
+    assert.equal(
+      extent.numBounds(),
+      1,
+      "Simplify must merge bounds with equal sizes."
+    );
   });
 
   it("Extent.numBounds", function () {
     const extent = new Extent();
-    assert.equal(extent.numBounds(), 0, "Extent must begin with an empty numBounds.");
+    assert.equal(
+      extent.numBounds(),
+      0,
+      "Extent must begin with an empty numBounds."
+    );
     extent.appendLS(1, 15);
     assert.equal(extent.numBounds(), 1, "Append must only add one bound.");
     extent.appendLS(1, 20);
     extent.appendLS(1, 25);
-    assert.equal(extent.numBounds(), 3, "Append must only add one bound per call.");
+    assert.equal(
+      extent.numBounds(),
+      3,
+      "Append must only add one bound per call."
+    );
   });
 
   it("Extent.separation", function () {
@@ -34,9 +46,10 @@ describe("Extent", function () {
 
     forwardExtent.appendLS(50, 10);
     backwardExtent.appendLS(50, 10);
-    assert.ok(testSeparation(20),
+    assert.ok(
+      testSeparation(20),
       "For single bounds, separation should be equivalent to the size of the " +
-      "forward and backward extents."
+        "forward and backward extents."
     );
 
     backwardExtent.appendLS(50, 20);
@@ -52,7 +65,7 @@ describe("Extent", function () {
     assert.ok(testSeparation(60), "No actual change");
   });
 
-  it("Extent.Simple combinedExtent", ()=>{
+  it("Extent.Simple combinedExtent", () => {
     const rootNode = new Extent();
     const forwardNode = new Extent();
 
@@ -69,7 +82,7 @@ describe("Extent", function () {
     assert.ok(expected.equals(combined), "Combining extents does not work.");
   });
 
-  it("Extent.equals", ()=>{
+  it("Extent.equals", () => {
     const rootNode = new Extent();
     const forwardNode = new Extent();
 
@@ -84,7 +97,7 @@ describe("Extent", function () {
     assert.ok(rootNode.equals(forwardNode), "Equals does not handle NaN well.");
   });
 
-  it("Extent.combinedExtent with NaN", ()=>{
+  it("Extent.combinedExtent with NaN", () => {
     const rootNode = new Extent();
     const forwardNode = new Extent();
 
@@ -96,7 +109,11 @@ describe("Extent", function () {
     forwardNode.appendLS(30, 5);
 
     const separation = rootNode.separation(forwardNode);
-    assert.equal(separation, 30, "Separation doesn't even match. Actual=" + separation);
+    assert.equal(
+      separation,
+      30,
+      "Separation doesn't even match. Actual=" + separation
+    );
 
     const combined = rootNode.combinedExtent(forwardNode, 0, separation);
 
@@ -108,7 +125,7 @@ describe("Extent", function () {
     assert.ok(expected.equals(combined), "Combining extents does not work.");
   });
 
-  it("Extent.combinedExtent", ()=>{
+  it("Extent.combinedExtent", () => {
     const rootNode = new Extent();
     const forwardNode = new Extent();
 
