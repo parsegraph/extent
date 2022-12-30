@@ -15,8 +15,8 @@
   },
   "homepage": "https://github.com/parsegraph/extent#readme",
   "dependencies": {
-    "parsegraph-fuzzyequals": "^1.4.9",
-    "parsegraph-gettimeinmillis": "^1.4.6"
+    "parsegraph-fuzzyequals": "^1.4.10",
+    "parsegraph-gettimeinmillis": "^1.4.7"
   },
   "devDependencies": {
     "@babel/cli": "^7.17.3",
