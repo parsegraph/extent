@@ -3911,15 +3911,15 @@ parse5@^7.0.0, parse5@^7.1.1:
   dependencies:
     entities "^4.4.0"
 
-parsegraph-fuzzyequals@^1.4.11:
-  version "1.4.11"
-  resolved "https://registry.yarnpkg.com/parsegraph-fuzzyequals/-/parsegraph-fuzzyequals-1.4.11.tgz#ef5a9960c333970cb442324078fd30fd3a40cc86"
-  integrity sha512-ZCOX/vuG7vsni2QqSVGTwFzGVxkEdb9SM5bya6lZBUmYpfVECULbDr2VqrhnmKpwOBLJ18fHrBf+Bm0qIlVAvg==
+parsegraph-fuzzyequals@^1.4.12:
+  version "1.4.12"
+  resolved "https://registry.yarnpkg.com/parsegraph-fuzzyequals/-/parsegraph-fuzzyequals-1.4.12.tgz#fbeea56695104a3791b3ba194ad589d85281a75c"
+  integrity sha512-rpI9Pb0wt8DiVOl1Cvw4kTjs+KjRSS7ktNeGuMz2h4dPEOM1WmhKVjixomYh/PY3VMjbm9xhzZDYG0jaBsZlRg==
 
-parsegraph-gettimeinmillis@^1.4.8:
-  version "1.4.8"
-  resolved "https://registry.yarnpkg.com/parsegraph-gettimeinmillis/-/parsegraph-gettimeinmillis-1.4.8.tgz#96c8a39929ba01d0c9929807b3add5fc1ca85fc1"
-  integrity sha512-EG0qil/jdMWiFJuHbAxETxNUQD0/BPNejUDwJKt1ObqIjGkrQ0rIzFlYrt83W26TQdaEE+Hqm/Gl5o0869pNRQ==
+parsegraph-gettimeinmillis@^1.4.9:
+  version "1.4.9"
+  resolved "https://registry.yarnpkg.com/parsegraph-gettimeinmillis/-/parsegraph-gettimeinmillis-1.4.9.tgz#2b921d515b1cf767d8a84447e8c7d0376b344d86"
+  integrity sha512-az+nImOhRkRJDUyn/QgA5Pgb7aSIeXlHL3i+hBPFxCD9cVRFy99MxKrcqxaRCQqcg2vFtP1GhacbkWx598vwtw==
 
 path-exists@^3.0.0:
   version "3.0.0"
